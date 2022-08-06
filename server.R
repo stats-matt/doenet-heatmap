@@ -1,3 +1,4 @@
+
 library(shiny)
 library(tidyverse)
 library(jsonlite)
@@ -151,12 +152,12 @@ shinyServer(function(input, output) {
   })
   
   #=================================PROCESSING DATA===============================
-
+  
   events <- reactive({
     df()$events[[1]]
   })
   
-
+  
   
   #Input from date slider determines which dates are included in the set.
   cleaned_version <- reactive({
@@ -168,9 +169,9 @@ shinyServer(function(input, output) {
   #Filter takes in previously cleaned data and then the version we select
   #cleaned = reactive({version_filter(cleaned_version(), input$version_selected)})
   
- # summary_data = reactive({summarize_events(cleaned())})
+  # summary_data = reactive({summarize_events(cleaned())})
   
- 
+  
   #=========================DOWNLOADING DATA======================================
   #This gives allows the user to download the data shown in a csv file for their
   #own purposes
@@ -222,6 +223,7 @@ shinyServer(function(input, output) {
   
   dropped = reactive({ add_ts(summary_data_version())})
   time_s = reactive({ time_spent(dropped())})
+  #re = reactive({rearrange_visible(time_s())})
   #km_r = reactive({ k_m(time_s())})
   #to_render = reactuve(clean_time_spent(time_s()))
   #output$k_m <-  renderPlot ( ggplot(time_s(), aes(item,time_spent)) + geom_point()

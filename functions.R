@@ -4,14 +4,23 @@ library(plyr)
 
 clean_events <- function(events,min_date,max_date) {
   
-  #This block adds the timestamp column to the cleaned data set
+  #extractting the visible verb and making it into a separate column
+  events <- 
+    events %>%
+    mutate (visible=(verb=="isVisible"))
+  
+  
+  #add timestamp, calculate the time visible started (new time)
   events <-
     events %>%
     group_by(userId) %>%
-    mutate(timestamp = anytime(timestamp)) %>%
-    mutate(time = timestamp - min(timestamp))
-  #%>%
-  # ungroup()
+    mutate(timestamp = anytime(timestamp))%>%
+    mutate(newtime = case_when(visible ~ timestamp-30,
+                               !visible ~ timestamp))%>%
+    mutate(time = newtime - min(newtime))%>%
+ungroup()
+  
+  events <- events[order(events$newtime),]
   
   
   #events<- events %>% filter(between(timestamp, min_date,max_date))
@@ -21,21 +30,14 @@ clean_events <- function(events,min_date,max_date) {
     mutate(new = map(object, ~ fromJSON(.) %>% as.data.frame())) %>%
     unnest(new)
   
-  # result is causing the X._problem columns
-  # from a single 
   events <-
     events %>%
     mutate(new = map(result, ~ fromJSON(.)%>% as.data.frame() %>% mutate_if(is.numeric, as.character))) %>%
     unnest(new)
-  
-  
-  events <- 
-    events %>%
-    mutate (visible=(verb=="isVisible"))
-  
+    
+  # mutually adding json to context when it's empty
   events$context[events$visible] <-"{\"visible1\":\"true\"}"
   
-  # parse context when context not blank
   events <-
     events %>%
     mutate(new = map(context, ~ fromJSON(., flatten = TRUE) %>% as.data.frame())) %>% 
@@ -49,8 +51,9 @@ clean_events <- function(events,min_date,max_date) {
 summarize_events <- function(data) {
   out <-
     data %>%
-    dplyr::select(userId, verb, visible, item,itemCreditAchieved,pageCreditAchieved, time, timestamp, pageNumber, 
-              response,creditAchieved) %>%
+    dplyr::select( -doenetId, -activityCid, -pageCid, -pageVariantIndex,-object,
+                   -context, -result, -visible1, -answerAncestor, -responseText, -componentType, -componentName,
+                   -version,-activityVariantIndex ) %>%
     group_by(userId, pageNumber) %>%
     #filter(!(is.na(itemCreditAchieved))) %>% 
     group_by(item) %>% 
@@ -80,6 +83,13 @@ time_spent <-function(data){
     ungroup()
   
   return(out)
+}
+
+#view only time related columns for debugging 
+view_time_spent <- function(data){
+  result <- data %>% 
+    dplyr :: select(userId, visible, time, timstamp, newtime, times_pent)
+  return(result)
 }
 
 #if all questions have been answered, ignore all visible? 
