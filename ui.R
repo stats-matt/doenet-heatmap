@@ -35,7 +35,9 @@ shinyUI(fluidPage(
     mainPanel(
       tabsetPanel(
         type = "tabs",
-        tabPanel("Time on each question", dataTableOutput("k_m"))
+        tabPanel("Time on each question", dataTableOutput("k_m")),
+        tabPanel("short table", dataTableOutput("short")),
+        tabPanel("plot", plotOutput("plot"))
         #tabPanel("Kmeans", plotOutput("k_m"))
         
       )

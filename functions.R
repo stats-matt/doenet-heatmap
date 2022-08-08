@@ -15,7 +15,7 @@ clean_events <- function(events,min_date,max_date) {
     events %>%
     group_by(userId) %>%
     mutate(timestamp = anytime(timestamp))%>%
-    mutate(newtime = case_when(visible ~ timestamp-30,
+    mutate(newtime = case_when(visible ~ timestamp-60,
                                !visible ~ timestamp))%>%
     mutate(time = newtime - min(newtime))%>%
 ungroup()
@@ -88,10 +88,20 @@ time_spent <-function(data){
 #view only time related columns for debugging 
 view_time_spent <- function(data){
   result <- data %>% 
-    dplyr :: select(userId, visible, time, timstamp, newtime, times_pent)
+    dplyr :: select(userId, visible, time, item, itemCreditAchieved, timestamp, newtime, time_spent)
   return(result)
 }
 
+#making the dataframe for plot
+ drop <- function(data){
+   out <- 
+     data %>%
+     subset( itemCreditAchieved == 1.0 )  %>%
+     subset(userId != 'xnhzpBB4t93gJNO6Jyesr') %>%  #hard coded to get rid of the error on this userid
+     dplyr::select(item, time_spent, userId)
+ }
+
+ 
 #if all questions have been answered, ignore all visible? 
 # clean_time_spent <- function(data){
 #   out <-

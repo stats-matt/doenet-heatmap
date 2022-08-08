@@ -223,10 +223,15 @@ shinyServer(function(input, output) {
   
   dropped = reactive({ add_ts(summary_data_version())})
   time_s = reactive({ time_spent(dropped())})
-  #re = reactive({rearrange_visible(time_s())})
-  #km_r = reactive({ k_m(time_s())})
-  #to_render = reactuve(clean_time_spent(time_s()))
-  #output$k_m <-  renderPlot ( ggplot(time_s(), aes(item,time_spent)) + geom_point()
-  #                          +   geom_point(data= km_r(), colour='cluster', size = 3))
+  short_r = reactive ({view_time_spent(time_s())})
+  drop_r = reactive (drop(short_r()))
+
   output$k_m <- renderDataTable(time_s())
+  output$short <- renderDataTable(short_r())
+  
+  #plotting the bar graph of time on each question
+  output$plot <- renderPlot(ggplot(drop_r(), aes(item, time_spent)) + 
+                            geom_bar(stat="identity") +
+                            facet_wrap(~userId) 
+  )
 })
