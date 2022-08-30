@@ -1,7 +1,7 @@
 #enableBookmarking(store = "url")
 
 shinyUI(fluidPage(
-  titlePanel("Doenet Data Analyzer"),
+  titlePanel("Doenet Heatmap"),
   sidebarLayout(
     sidebarPanel(
       width = 3,
@@ -35,11 +35,11 @@ shinyUI(fluidPage(
     mainPanel(
       tabsetPanel(
         type = "tabs",
+        tabPanel("Summary Table", dataTableOutput("time_table")),
         tabPanel("Time on each question", dataTableOutput("k_m")),
         tabPanel("short table", dataTableOutput("short")),
         tabPanel("plot", plotOutput("plot"))
         #tabPanel("Kmeans", plotOutput("k_m"))
-        
       )
     )
   )))

@@ -1,9 +1,9 @@
-
 library(shiny)
 library(tidyverse)
 library(jsonlite)
 library(anytime)
 library(dplyr)
+library(magrittr)
 
 shinyServer(function(input, output) {
   source("./functions.R")
@@ -91,21 +91,24 @@ shinyServer(function(input, output) {
   
   #These next two lines pull data directly from events (before it is cleaned)
   # that is crucial to determining the date and version selection on the sidebar.
-  # As a rule we have typically tried to avoid working on events directly, but 
+  # As a rule we have typically tried to avoid working on events directly, but
   # because this determines how we clean we have made an exception.
   dates <- reactive(pull_dates(events()))
   versions <- reactive(pull_versions(events()))
   
   #This outputs the version selection and the date slider for the UI
-  output$version_select = renderUI({ selectInput("version_selected", "Version: ", c(1:versions()))})
-  output$date_slider = renderUI({sliderInput("date_range", "Data from: ", 
-                                             min = min(dates()), 
-                                             max = max(dates()), 
-                                             value = c(
-                                               min(dates()),
-                                               max(dates())
-                                             )
-  )
+  output$version_select = renderUI({
+    selectInput("version_selected", "Version: ", c(1:versions()))
+  })
+  output$date_slider = renderUI({
+    sliderInput(
+      "date_range",
+      "Data from: ",
+      min = min(dates()),
+      max = max(dates()),
+      value = c(min(dates()),
+                max(dates()))
+    )
   })
   
   #==========================GETTING DATA=========================================
@@ -123,7 +126,6 @@ shinyServer(function(input, output) {
   #df contains this 1 by 3 frame at the end of this block
   df <- eventReactive(input$submit_extra | input$update, {
     if (input$submit_extra != 0) {
-      
       end_of_link = paste0(
         "&doenetId[]=",
         input$id1,
@@ -146,6 +148,7 @@ shinyServer(function(input, output) {
         "https://www.doenet.org/api/getEventData.php?doenetId[]=",
         #"_YImZRcgrUqyNBLHd0tbP2" # for debugging to have a set doenetid to use
         getQueryString()[["data"]],
+        #"_e4AbpmZyr2uiRRE7VPfZl", # matts example id
         end_of_link
       )
     ))
@@ -160,11 +163,17 @@ shinyServer(function(input, output) {
   
   
   #Input from date slider determines which dates are included in the set.
-  cleaned_version <- reactive({
-    clean_events(events(),input$date_range[1],input$date_range[2]) 
+  # was cleaned_version
+  cleaned <- reactive({
+    clean_events(events(), input$date_range[1], input$date_range[2])
   })
   
-  summary_data_version <- reactive({summarize_events(cleaned_version())})
+  cleaned_version <- cleaned
+  
+  summary_data_version <-
+    reactive({
+      summarize_events(cleaned_version())
+    })
   
   #Filter takes in previously cleaned data and then the version we select
   #cleaned = reactive({version_filter(cleaned_version(), input$version_selected)})
@@ -201,7 +210,8 @@ shinyServer(function(input, output) {
       " student(s)"
     ))
   #creates an output text detailing how many versions are present in the set
-  output$num_versions <- renderText(paste0("There are ",versions() ))
+  output$num_versions <-
+    renderText(paste0("There are ", versions()))
   
   #creates an output text detailing how many different doenet experiments
   #are represented in this set.
@@ -221,17 +231,33 @@ shinyServer(function(input, output) {
   
   #==========================================================================
   
-  dropped = reactive({ add_ts(summary_data_version())})
-  time_s = reactive({ time_spent(dropped())})
-  short_r = reactive ({view_time_spent(time_s())})
-  drop_r = reactive (drop(short_r()))
-
+  dropped <-  reactive({
+    add_ts(summary_data_version())
+  })
+  time_s <-  reactive({
+    time_spent(dropped())
+  })
+  short_r <-  reactive({
+    view_time_spent(time_s())
+  })
+  drop_r <-  reactive(drop(short_r()))
+  
   output$k_m <- renderDataTable(time_s())
   output$short <- renderDataTable(short_r())
   
   #plotting the bar graph of time on each question
-  output$plot <- renderPlot(ggplot(drop_r(), aes(item, time_spent)) + 
-                            geom_bar(stat="identity") +
-                            facet_wrap(~userId) 
-  )
-})
+  output$plot <-
+    renderPlot(ggplot(drop_r(), aes(item, time_spent)) +
+                 geom_bar(stat = "identity") +
+                 facet_wrap( ~ userId))
+
+  times <- reactive(get_times(cleaned()))
+  
+  output$time_table <- 
+    renderDataTable(times())
+  
+  
+  
+  
+  
+  })
