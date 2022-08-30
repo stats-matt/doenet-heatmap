@@ -22,5 +22,17 @@ cleaned <- cleaned_versions
 
 summary_data <- summarize_events(cleaned)
 
+times <-
+  cleaned %>%
+  select(userId, starts_with("X._")) %>%
+  rename_all(list( ~ str_replace(., "X._", ""))) %>%
+  type_convert() %>%
+  group_by(userId) %>%
+  dplyr::summarize(across(everything(), ~ sum(.x, na.rm = T))) %>%
+  ungroup() %>%
+  select(-userId) %>%
+  dplyr::summarize(across(everything(), ~ sum(.x, na.rm = T)))
+times
+
 times <- get_times(cleaned)
 times

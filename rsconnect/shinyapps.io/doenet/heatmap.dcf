@@ -5,9 +5,9 @@ account: doenet
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 6880493
-bundleId: 6253146
+bundleId: 6253208
 url: https://doenet.shinyapps.io/heatmap/
-when: 1661891625.2246
-lastSyncTime: 1661891625.22461
+when: 1661892569.13098
+lastSyncTime: 1661892569.13102
 asMultiple: FALSE
 asStatic: FALSE

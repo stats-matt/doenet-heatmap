@@ -49,13 +49,21 @@ clean_events <- function(events, min_date, max_date) {
 }
 
 get_times <- function(data) {
-  times <- data %>% select(starts_with("X._")) %>%
-    rename_all(list(~ str_replace(., "X._", ""))) %>%
+  times <- data %>% 
+    select(userId, starts_with("X._")) %>%
+    rename_all(list( ~ str_replace(., "X._", ""))) %>%
     type_convert() %>%
-    #mutate(across(where(is.character), ~ as.numeric))
+    group_by(userId) %>%
+    dplyr::summarize(across(everything(), ~ sum(.x, na.rm = T))) %>%
+    ungroup() %>%
+    select(-userId) %>%
     dplyr::summarize(across(everything(), ~ sum(.x, na.rm = T)))
   return(times)
 }
+
+
+
+
 
 #############################################################
 # cleaning - everything above this is definitely needed
