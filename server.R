@@ -249,15 +249,15 @@ shinyServer(function(input, output) {
   output$plot <-
     renderPlot(ggplot(drop_r(), aes(item, time_spent)) +
                  geom_bar(stat = "identity") +
-                 facet_wrap( ~ userId))
-
+                 facet_wrap(~ userId))
+  
   times <- reactive(get_times(cleaned()))
   
-  output$time_table <- 
+  output$time_table <-
     renderDataTable(times())
   
   
   
   
   
-  })
+})

@@ -42,4 +42,5 @@ shinyUI(fluidPage(
         #tabPanel("Kmeans", plotOutput("k_m"))
       )
     )
-  )))
+  )
+))

@@ -23,10 +23,10 @@ clean_events <- function(events, min_date, max_date) {
     events %>%
     group_by(userId) %>%
     mutate(timestamp = anytime(timestamp)) %>%
-    mutate(newtime = case_when(visible ~ timestamp - 60, !visible ~ timestamp)) %>%
+    mutate(newtime = case_when(visible ~ timestamp - 60,!visible ~ timestamp)) %>%
     mutate(time = newtime - min(newtime)) %>%
     ungroup()
-  events <- events[order(events$newtime),]
+  events <- events[order(events$newtime), ]
   #events<- events %>% filter(between(timestamp, min_date,max_date))
   events <-
     events %>%
@@ -49,9 +49,9 @@ clean_events <- function(events, min_date, max_date) {
 }
 
 get_times <- function(data) {
-  times <- data %>% 
+  times <- data %>%
     select(userId, starts_with("X._")) %>%
-    rename_all(list( ~ str_replace(., "X._", ""))) %>%
+    rename_all(list(~ str_replace(., "X._", ""))) %>%
     type_convert() %>%
     group_by(userId) %>%
     dplyr::summarize(across(everything(), ~ sum(.x, na.rm = T))) %>%
@@ -82,18 +82,9 @@ summarize_events <- function(data) {
   out <-
     data %>%
     dplyr::select(
-      -doenetId,
-      -activityCid,
-      -pageCid,
-      -pageVariantIndex,
-      -object,-context,
-      -result,
-      -visible1,
-      -answerAncestor,
-      -responseText,
-      -componentType,
-      -componentName,-version,
-      -activityVariantIndex
+      -doenetId,-activityCid,-pageCid,-pageVariantIndex,-object,
+      -context,-result,-visible1,-answerAncestor,-responseText,-componentType,-componentName,
+      -version,-activityVariantIndex
     ) %>%
     group_by(userId, pageNumber) %>%
     #filter(!(is.na(itemCreditAchieved))) %>%
@@ -163,4 +154,3 @@ drop <- function(data) {
 #   return(out)
 #
 # }
-

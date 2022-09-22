@@ -1,31 +1,41 @@
+# this is a scratch file to test new functions etc. locally before moving them to the shiny app
+
+# load libraries
 library(shiny)
 library(tidyverse)
 library(jsonlite)
 library(anytime)
 library(dplyr)
 
+source("functions.R")
 
-# raw = stream_in(file(
-#   paste0(
-#     "https://www.doenet.org/api/getEventData.php?doenetId[]=_e4AbpmZyr2uiRRE7VPfZl"
-#   )
-# ))
+# load data (put in a doenetid - good doenetids to use are on slack)
+doenetid <- ""
+raw <-  stream_in(file(
+  paste0(
+    "https://www.doenet.org/api/getEventData.php?doenetId[]=",
+    doenetid
+  )
+))
 
-events = raw$events[[1]]
-
+# clean the data
+events <-  raw$events[[1]]
 dates <- pull_dates(events)
-versions <- pull_versions(events)
-
-cleaned <- clean_events(events, min(dates), max(dates))
-
-cleaned <- cleaned_versions
-
+min_date <- min(dates)
+max_date <- max(dates)
+cleaned_version <- clean_events(events, min(dates), max(dates))
+summary_data_version <- summarize_events(cleaned)
+cleaned <- version_filter(cleaned_version, 1)
 summary_data <- summarize_events(cleaned)
+
+###########################################
+##### work below here
+###########################################
 
 times <-
   cleaned %>%
   select(userId, starts_with("X._")) %>%
-  rename_all(list( ~ str_replace(., "X._", ""))) %>%
+  rename_all(list(~ str_replace(., "X._", ""))) %>%
   type_convert() %>%
   group_by(userId) %>%
   dplyr::summarize(across(everything(), ~ sum(.x, na.rm = T))) %>%
